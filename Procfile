@@ -1,2 +1,3 @@
-web: gunicorn core.wsgi
+web: gunicorn extraordinary.wsgi
+
 
