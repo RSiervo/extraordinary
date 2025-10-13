@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Images — Extraordinary{% endblock %}
+{% block content %}
+
+<section class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+  <div data-aos="fade-up" class="text-center mb-10">
+    <h1 class="text-4xl font-extrabold text-green-400 mb-4">Image Collection</h1>
+    <p class="text-slate-400 max-w-3xl mx-auto">
+      Browse through curated photos and artistic visuals that tell stories beyond words.
+    </p>
+  </div>
+
+  <!-- ✅ 4 images per row on mobile -->
+  <div class="grid grid-cols-4 gap-2 sm:gap-4 lg:grid-cols-4">
+    {% for photo in photos %}
+    <div data-aos="zoom-in" class="rounded-xl overflow-hidden group shadow-md hover:shadow-green-400/30 transition-all duration-500">
+      <img src="{{ photo.file.url }}" alt="{{ photo.title }}" class="w-full h-28 sm:h-48 object-cover group-hover:scale-110 transition-transform duration-500">
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center text-slate-500">
+      <i class="fas fa-camera-retro text-5xl mb-4"></i>
+      <p>No images found.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Gallery — Extraordinary{% endblock %}
+{% block content %}
+
+<section class="max-w-6xl mx-auto px-6 py-20">
+  <!-- Title -->
+  <div data-aos="fade-up" class="text-center mb-14">
+    <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-400 drop-shadow-lg mb-4">
+      Gallery
+    </h1>
+    <p class="text-slate-400 max-w-3xl mx-auto text-lg">
+      Explore breathtaking anime-inspired visuals, moments, and artistry from our community.
+    </p>
+  </div>
+
+  <!-- Gallery Grid -->
+  <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+    {% for image in gallery %}
+    <div data-aos="zoom-in" class="relative group bg-slate-800/40 rounded-2xl overflow-hidden shadow-lg hover:shadow-green-400/30 transition-all duration-500 cursor-pointer" onclick="openPreview('{{ image.file.url }}', '{{ image.title|escapejs }}', '{{ image.anime_name|escapejs }}', '{{ image.description|escapejs }}')">
+      <div class="overflow-hidden">
+        <img src="{{ image.file.url }}" 
+             alt="{{ image.title }}" 
+             class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out">
+      </div>
+      <!-- Hover Title -->
+      <div class="absolute bottom-0 left-0 right-0 bg-slate-900/80 text-center py-4 opacity-0 group-hover:opacity-100 transition duration-500">
+        <h2 class="text-green-400 text-xl font-bold">{{ image.title }}</h2>
+        <p class="text-slate-300 text-sm italic">{{ image.anime_name }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center text-slate-500 py-10">
+      <i class="fas fa-image text-5xl mb-4"></i>
+      <p>No gallery images uploaded yet.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden justify-center items-center z-50">
+  <div class="relative bg-slate-900 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden border border-green-500/30">
+    <!-- Close Button -->
+    <button onclick="closePreview()" class="absolute top-4 right-4 text-slate-400 hover:text-green-400 transition text-2xl">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <!-- Image -->
+    <img id="previewImage" src="" alt="Preview" class="w-full h-80 object-cover border-b border-slate-700">
+
+    <!-- Content -->
+    <div class="p-6 max-h-72 overflow-y-auto">
+      <h2 id="previewTitle" class="text-3xl font-bold text-green-400 mb-2"></h2>
+      <p id="previewAnime" class="text-slate-400 italic mb-4"></p>
+      <p id="previewDescription" class="text-slate-300 leading-relaxed whitespace-pre-line"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+  function openPreview(imageUrl, title, anime, description) {
+    const modal = document.getElementById('previewModal');
+    document.getElementById('previewImage').src = imageUrl;
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewAnime').textContent = anime;
+    document.getElementById('previewDescription').textContent = description || "No description available.";
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closePreview() {
+    const modal = document.getElementById('previewModal');
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
+  }
+
+  // Close modal on background click
+  document.getElementById('previewModal').addEventListener('click', function(e) {
+    if (e.target === this) closePreview();
+  });
+</script>
+
+<!-- Custom Styling -->
+<style>
+  /* Smooth modal scroll */
+  #previewModal::-webkit-scrollbar {
+    width: 6px;
+  }
+  #previewModal::-webkit-scrollbar-thumb {
+    background-color: #10b981;
+    border-radius: 10px;
+  }
+
+  .group:hover img {
+    filter: brightness(1.15);
+  }
+
+  .group:hover h2 {
+    text-shadow: 0 0 10px #10b981;
+  }
+
+  /* Modal fade-in */
+  #previewModal.flex {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+</style>
+
+{% endblock %}

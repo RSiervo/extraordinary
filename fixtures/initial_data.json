@@ -1,0 +1,13 @@
+[
+  {
+    "model": "core.featuredpost",
+    "pk": 1,
+    "fields": {
+      "title": "Welcome to Extraordinary",
+      "description": "This is a demo featured post. Replace with real content from admin.",
+      "image_url": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder",
+      "video_url": "",
+      "created_at": "2025-10-06T12:00:00Z"
+    }
+  }
+]
