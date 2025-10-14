@@ -77,3 +77,13 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ✅ Railway trust
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+
+
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+SUPABASE_BUCKET = 'media'
+
+DEFAULT_FILE_STORAGE = 'your_app.storage_backends.SupabaseStorage'
+
+MEDIA_URL = 'https://cypiqcdjdgeixybaehok.supabase.co/storage/v1/object/public/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
