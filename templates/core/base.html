@@ -26,6 +26,11 @@
       opacity: 1;
       transform: scale(1);
     }
+
+    html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
   </style>
 </head>
 
@@ -69,10 +74,10 @@
 
 
 <!-- MOBILE BOTTOM NAV (Visible only on Mobile) -->
-<nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden 
-  bg-slate-800/80 backdrop-blur-md border border-slate-700 shadow-lg 
-  w-[90%] max-w-sm mx-auto rounded-2xl px-4 py-3 flex items-center justify-between 
-  text-green-400 text-xl">
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 md:hidden 
+  bg-slate-800/90 backdrop-blur-md border-t border-slate-700 shadow-lg 
+  w-full max-w-md rounded-none px-4 py-3 flex items-center justify-between 
+  text-green-400 text-xl safe-area-inset-bottom">
 
   <!-- Logo -->
   <a href="/" class="flex items-center">

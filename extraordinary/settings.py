@@ -5,8 +5,8 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'replace-me-with-a-secure-key'
 DEBUG = False
-#ALLOWED_HOSTS = ['.vercel.app', 'localhost']
-ALLOWED_HOSTS = ['extraordinary-production.up.railway.app']
+#ALLOWED_HOSTS = ['*', '.vercel.app', 'localhost']
+ALLOWED_HOSTS = ['*', 'extraordinary-production.up.railway.app']
 INSTALLED_APPS = [
     'django.contrib.admin','django.contrib.auth','django.contrib.contenttypes',
     'django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles',
