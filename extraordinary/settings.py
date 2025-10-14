@@ -83,7 +83,7 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 SUPABASE_BUCKET = 'media'
 
-DEFAULT_FILE_STORAGE = 'your_app.storage_backends.SupabaseStorage'
+DEFAULT_FILE_STORAGE = 'core.storage_backends.SupabaseStorage'
 
-MEDIA_URL = f"{'https://cypiqcdjdgeixybaehok.supabase.co'}/storage/v1/object/public/media/"
+MEDIA_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

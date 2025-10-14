@@ -1,26 +1,27 @@
 import os
-from supabase import create_client, Client
 from django.core.files.storage import Storage
-from django.conf import settings
+from django.core.files.base import ContentFile
+from supabase import create_client, Client
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 class SupabaseStorage(Storage):
-    def __init__(self):
-        self.supabase: Client = create_client(
-            settings.SUPABASE_URL,
-            settings.SUPABASE_KEY
-        )
-        self.bucket_name = getattr(settings, 'SUPABASE_BUCKET', 'media')
-
     def _save(self, name, content):
+        # Upload the file to Supabase bucket
         data = content.read()
-        self.supabase.storage.from_(self.bucket_name).upload(name, data)
+        supabase.storage.from_(SUPABASE_BUCKET).upload(name, data)
         return name
 
-    def url(self, name):
-        public_url = self.supabase.storage.from_(self.bucket_name).get_public_url(name)
-        return public_url
-
     def exists(self, name):
-        # Optional: check if the file already exists
-        res = self.supabase.storage.from_(self.bucket_name).list()
-        return any(f['name'] == name for f in res)
+        try:
+            supabase.storage.from_(SUPABASE_BUCKET).get_public_url(name)
+            return False
+        except Exception:
+            return True
+
+    def url(self, name):
+        return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{name}"
