@@ -56,3 +56,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # For production security
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+
+# Important for production (allow Railway to serve)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
