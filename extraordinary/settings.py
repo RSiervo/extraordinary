@@ -85,5 +85,5 @@ SUPABASE_BUCKET = 'media'
 
 DEFAULT_FILE_STORAGE = 'your_app.storage_backends.SupabaseStorage'
 
-MEDIA_URL = 'https://cypiqcdjdgeixybaehok.supabase.co/storage/v1/object/public/media/'
+MEDIA_URL = f"{'https://cypiqcdjdgeixybaehok.supabase.co'}/storage/v1/object/public/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
