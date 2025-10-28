@@ -141,7 +141,9 @@ function toggleDescription(button) {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   transition: all 0.3s ease-in-out;
+  text-align: justify;   /* ✅ This line makes text justified */
 }
+
 
 /* ✅ Custom collapsed/expanded behavior (no global Tailwind interference) */
 .description.collapsed {
