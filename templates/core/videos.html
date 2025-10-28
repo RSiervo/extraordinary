@@ -3,152 +3,156 @@
 {% block title %}Videos — Extraordinary{% endblock %}
 {% block content %}
 
-<!-- Gallery Grid -->
-<div
-  class="grid 
-         grid-cols-3        <!-- base: show 3 cards per row on small screens -->
-         xs:grid-cols-4     <!-- slightly larger mobiles show 4 -->
-         sm:grid-cols-2 
-         md:grid-cols-3 
-         lg:grid-cols-4 
-         gap-4 sm:gap-6 lg:gap-8 
-         place-items-center
-         mt-6 mx-4 sm:mx-8"   <!-- added margins: top, left, right -->
+<!-- VIDEO GRID -->
+<div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8 px-4 items-start">
+
+
+
 
   {% for feature in features %}
   <div
     data-aos="zoom-in"
-    class="group bg-slate-800/50 border border-slate-700 hover:border-green-400 rounded-2xl overflow-hidden shadow-lg hover:shadow-green-400/20 transition-all duration-500 w-full max-w-[180px] sm:max-w-none"
+    class="group bg-slate-800/50 border border-slate-700 hover:border-green-400 rounded-2xl overflow-hidden shadow-md hover:shadow-green-400/30 transition-all duration-500 flex flex-col"
   >
-    <div class="relative">
-      <div class="relative w-full h-32 sm:h-48 overflow-hidden">
-        {% if feature.image %}
-          <img src="{{ feature.image.url }}" alt="{{ feature.title }}" class="w-full h-full object-cover">
-        {% else %}
-          <img src="{% static 'images/default-thumbnail.jpg' %}" alt="Thumbnail" class="w-full h-full object-cover">
+    <!-- Thumbnail -->
+    <div class="relative w-full aspect-[16/9] overflow-hidden">
+      {% if feature.image %}
+        <img src="{{ feature.image.url }}" alt="{{ feature.title }}"
+             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+      {% else %}
+        <img src="{% static 'images/default-thumbnail.jpg' %}" alt="Thumbnail"
+             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+      {% endif %}
+      <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition duration-300">
+        {% if feature.video_url %}
+          <button class="bg-green-500 text-white rounded-full p-4 hover:bg-green-400 transition"
+            onclick="openVideoModal('{{ feature.video_url }}', '{{ feature.title }}')">
+            <i class="fas fa-play text-lg"></i>
+          </button>
+        {% elif feature.uploaded_video %}
+          <button class="bg-green-500 text-white rounded-full p-4 hover:bg-green-400 transition"
+            onclick="openVideoModal('{{ feature.uploaded_video.url }}', '{{ feature.title }}')">
+            <i class="fas fa-play text-lg"></i>
+          </button>
         {% endif %}
-        <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition duration-300">
-          {% if feature.video_url %}
-            <button class="bg-green-500 text-white rounded-full p-3 sm:p-4 hover:bg-green-400 transition" 
-              onclick="openYouTubeModal('{{ feature.video_url }}', '{{ feature.title }}')">
-              <i class="fas fa-play text-lg sm:text-xl"></i>
-            </button>
-          {% elif feature.uploaded_video %}
-            <button class="bg-green-500 text-white rounded-full p-3 sm:p-4 hover:bg-green-400 transition" 
-              onclick="openLocalVideoModal('{{ feature.uploaded_video.url }}', '{{ feature.title }}')">
-              <i class="fas fa-play text-lg sm:text-xl"></i>
-            </button>
-          {% endif %}
-        </div>
       </div>
     </div>
-    <div class="p-2 sm:p-4">
-      <h2 class="text-sm sm:text-lg font-semibold text-green-400 truncate">{{ feature.title }}</h2>
-      <p class="text-slate-400 text-xs sm:text-sm mt-1 line-clamp-2">{{ feature.description|truncatewords:20 }}</p>
+
+    <!-- Card Content -->
+    <div class="p-4 flex flex-col flex-grow">
+      <h2 class="text-lg font-semibold text-green-400 truncate">{{ feature.title }}</h2>
+
+      <p class="text-slate-400 text-sm mt-2 description collapsed transition-all duration-300 ease-in-out">
+        {{ feature.description }}
+      </p>
+
+      <button onclick="toggleDescription(this)" class="text-xs text-green-400 mt-2 hover:text-teal-300 transition">
+        Show more
+      </button>
     </div>
   </div>
+
   {% empty %}
-  <div class="col-span-full text-center text-slate-500">
+  <div class="col-span-full text-center text-slate-500 py-10">
     <i class="fas fa-video-slash text-5xl mb-4"></i>
     <p>No videos available yet.</p>
   </div>
   {% endfor %}
 </div>
 
-<!-- Modal for YouTube -->
-<div id="youtubeModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center">
+<!-- VIDEO MODAL -->
+<div id="videoModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center">
   <div class="relative w-full max-w-3xl mx-4">
-    <button class="absolute -top-10 right-0 text-white text-3xl hover:text-green-400" onclick="closeYouTubeModal()">&times;</button>
-    <div id="youtubeNowPlaying" class="absolute top-3 left-4 text-green-400 font-bold text-lg animate-pulse hidden"></div>
-    <div class="aspect-w-16 aspect-h-9">
-      <iframe id="youtubeFrame" class="w-full h-96 rounded-lg" frameborder="0"
-        allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-    </div>
-  </div>
-</div>
+    <button class="absolute -top-10 right-0 text-white text-3xl hover:text-green-400" onclick="closeVideoModal()">&times;</button>
+    <div id="nowPlayingTitle" class="absolute top-3 left-4 text-green-400 font-bold text-lg animate-pulse hidden"></div>
 
-<!-- Modal for Uploaded Videos -->
-<div id="localVideoModal" class="fixed inset-0 bg-black/90 hidden z-50 flex flex-col items-center justify-center p-4">
-  <div class="relative w-full max-w-3xl">
-    <button class="absolute -top-10 right-0 text-white text-3xl hover:text-green-400" onclick="closeLocalVideoModal()">&times;</button>
-
-    <!-- Animated video title overlay -->
-    <div id="nowPlaying" class="absolute top-3 left-4 text-green-400 font-bold text-lg animate-pulse hidden"></div>
-
-    <video id="localVideoPlayer" class="w-full rounded-lg" controls></video>
-
-    <!-- Icon Playback Controls -->
-    <div class="flex justify-center gap-6 mt-4 text-white text-2xl">
-      <button class="hover:text-green-400 transition" onclick="skipBackward()"><i class="fas fa-undo-alt"></i></button>
-      <button class="hover:text-green-400 transition" onclick="restartLocalVideo()"><i class="fas fa-redo-alt"></i></button>
-      <button class="hover:text-green-400 transition" onclick="playLocalVideo()"><i class="fas fa-play"></i></button>
-      <button class="hover:text-green-400 transition" onclick="pauseLocalVideo()"><i class="fas fa-pause"></i></button>
-      <button class="hover:text-green-400 transition" onclick="toggleMute()"><i class="fas fa-volume-mute"></i></button>
-      <button class="hover:text-green-400 transition" onclick="skipForward()"><i class="fas fa-forward"></i></button>
+    <div id="videoContainer" class="w-full aspect-[16/9] rounded-lg overflow-hidden">
+      <!-- iframe or video injected dynamically -->
     </div>
   </div>
 </div>
 
 <script>
-// --- YouTube ---
-function openYouTubeModal(url, title) {
-  const videoId = url.replace('https://www.youtube.com/watch?v=', '').replace('https://youtu.be/', '');
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-  document.getElementById('youtubeFrame').src = embedUrl;
-  const nowPlaying = document.getElementById('youtubeNowPlaying');
+// ✅ Universal video modal (YouTube, Vimeo, Dailymotion, direct MP4)
+function openVideoModal(url, title) {
+  const container = document.getElementById("videoContainer");
+  const modal = document.getElementById("videoModal");
+  const nowPlaying = document.getElementById("nowPlayingTitle");
+
+  let embedHTML = "";
+
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    const videoId = url
+      .replace("https://www.youtube.com/watch?v=", "")
+      .replace("https://youtu.be/", "")
+      .split("&")[0];
+    embedHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                   class="w-full h-full" frameborder="0"
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                   allowfullscreen></iframe>`;
+  } else if (url.includes("vimeo.com")) {
+    const videoId = url.split("/").pop();
+    embedHTML = `<iframe src="https://player.vimeo.com/video/${videoId}?autoplay=1"
+                   class="w-full h-full" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  } else if (url.includes("dailymotion.com")) {
+    const videoId = url.split("/video/")[1];
+    embedHTML = `<iframe src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=1"
+                   class="w-full h-full" frameborder="0" allow="autoplay" allowfullscreen></iframe>`;
+  } else if (url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg")) {
+    embedHTML = `<video src="${url}" class="w-full h-full" controls autoplay></video>`;
+  } else {
+    embedHTML = `<iframe src="${url}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>`;
+  }
+
+  container.innerHTML = embedHTML;
   nowPlaying.textContent = title;
-  nowPlaying.classList.remove('hidden');
-  document.getElementById('youtubeModal').classList.remove('hidden');
-}
-function closeYouTubeModal() {
-  document.getElementById('youtubeFrame').src = '';
-  document.getElementById('youtubeModal').classList.add('hidden');
-  document.getElementById('youtubeNowPlaying').classList.add('hidden');
+  nowPlaying.classList.remove("hidden");
+  modal.classList.remove("hidden");
 }
 
-// --- Local Video ---
-function openLocalVideoModal(url, title) {
-  const player = document.getElementById('localVideoPlayer');
-  player.src = url;
-  player.play();
-  document.getElementById('localVideoModal').classList.remove('hidden');
-
-  const nowPlaying = document.getElementById('nowPlaying');
-  nowPlaying.textContent = title;
-  nowPlaying.classList.remove('hidden');
-}
-function closeLocalVideoModal() {
-  const player = document.getElementById('localVideoPlayer');
-  player.pause();
-  player.src = '';
-  document.getElementById('localVideoModal').classList.add('hidden');
-  document.getElementById('nowPlaying').classList.add('hidden');
+function closeVideoModal() {
+  const container = document.getElementById("videoContainer");
+  const modal = document.getElementById("videoModal");
+  document.getElementById("nowPlayingTitle").classList.add("hidden");
+  container.innerHTML = "";
+  modal.classList.add("hidden");
 }
 
-// --- Controls ---
-function playLocalVideo() {
-  document.getElementById('localVideoPlayer').play();
-}
-function pauseLocalVideo() {
-  document.getElementById('localVideoPlayer').pause();
-}
-function restartLocalVideo() {
-  const player = document.getElementById('localVideoPlayer');
-  player.currentTime = 0;
-  player.play();
-}
-function toggleMute() {
-  const player = document.getElementById('localVideoPlayer');
-  player.muted = !player.muted;
-}
-function skipForward() {
-  const player = document.getElementById('localVideoPlayer');
-  player.currentTime += 10;
-}
-function skipBackward() {
-  const player = document.getElementById('localVideoPlayer');
-  player.currentTime -= 10;
+// ✅ Expand only the clicked description
+function toggleDescription(button) {
+  const description = button.previousElementSibling;
+  const expanded = description.classList.toggle("expanded");
+  description.classList.toggle("collapsed", !expanded);
+  button.textContent = expanded ? "Show less" : "Show more";
 }
 </script>
+
+<style>
+/* Make cards equal height */
+.grid > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Description clamp simulation */
+.description {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  transition: all 0.3s ease-in-out;
+}
+
+/* ✅ Custom collapsed/expanded behavior (no global Tailwind interference) */
+.description.collapsed {
+  line-clamp: 3;              /* Standard property */
+  -webkit-line-clamp: 3;      /* For WebKit browsers like Chrome, Safari, Edge */
+}
+
+.description.expanded {
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
+}
+</style>
 
 {% endblock %}
