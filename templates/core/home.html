@@ -106,65 +106,67 @@
       <span class="text-slate-400 text-sm sm:text-base">Admin-posted highlights</span>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- ✅ Same structure & responsiveness as videos.html -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
       {% for p in posts %}
-      <article class="bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-green-400/20 hover:scale-[1.02] transition" data-aos="zoom-in">
-        
-        {% if p.video_url %}
-          {% comment %} Get the YouTube video ID from the URL {% endcomment %}
-          {% with p.video_url|cut:"https://www.youtube.com/watch?v="|cut:"https://youtu.be/" as video_id %}
-            <div class="relative aspect-video bg-black overflow-hidden">
-              {% if p.image %}
-                <img src="{{ p.image.url }}" alt="{{ p.title }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-50 transition">
-              {% else %}
-                <img src="https://img.youtube.com/vi/{{ video_id }}/hqdefault.jpg" alt="{{ p.title }}" class="w-full h-full object-cover">
-              {% endif %}
-              <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition">
-                <button
-                  class="bg-green-500 text-white p-4 rounded-full hover:bg-green-400"
-                  onclick="openVideoModal('{{ p.video_url }}')"
-                >
-                  <i class="fas fa-play text-xl"></i>
-                </button>
-              </div>
-            </div>
-          {% endwith %}
-        {% elif p.image %}
-          <img src="{{ p.image.url }}" alt="{{ p.title }}" class="w-full h-48 object-cover">
-        {% endif %}
-        
-        <div class="p-4">
-          <h4 class="font-semibold text-lg text-teal-300">{{ p.title }}</h4>
-          <p class="text-slate-300 text-sm mt-2">{{ p.description|truncatechars:120 }}</p>
+      <div
+        data-aos="zoom-in"
+        class="group bg-slate-800/50 border border-slate-700 hover:border-green-400 rounded-2xl overflow-hidden shadow-md hover:shadow-green-400/30 transition-all duration-500 flex flex-col"
+      >
+        <!-- Thumbnail -->
+        <div class="relative w-full aspect-[16/9] overflow-hidden">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" alt="{{ p.title }}"
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+          {% else %}
+            <img src="{% static 'images/default-thumbnail.jpg' %}" alt="Thumbnail"
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+          {% endif %}
+          {% if p.video_url %}
+          <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition duration-300">
+            <button class="bg-green-500 text-white rounded-full p-4 hover:bg-green-400 transition"
+              onclick="openVideoModal('{{ p.video_url }}', '{{ p.title }}')">
+              <i class="fas fa-play text-lg"></i>
+            </button>
+          </div>
+          {% endif %}
         </div>
-      </article>
+
+        <!-- Card Content -->
+        <div class="p-4 flex flex-col flex-grow">
+          <h4 class="font-semibold text-lg text-green-400 truncate">{{ p.title }}</h4>
+
+          <p class="text-slate-400 text-sm mt-2 description collapsed transition-all duration-300 ease-in-out">
+            {{ p.description }}
+          </p>
+
+          <button onclick="toggleDescription(this)" class="text-xs text-green-400 mt-2 hover:text-teal-300 transition">
+            Show more
+          </button>
+        </div>
+      </div>
       {% empty %}
-      <div class="col-span-full text-center text-slate-400">No featured posts yet — create some in the admin.</div>
+      <div class="col-span-full text-center text-slate-400 py-10">
+        <i class="fas fa-video-slash text-5xl mb-4"></i>
+        <p>No featured posts yet — create some in the admin.</p>
+      </div>
       {% endfor %}
+    </div>
+  </div>
+
+  <!-- ✅ Reuse the video modal -->
+  <div id="videoModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center">
+    <div class="relative w-full max-w-3xl mx-4">
+      <button class="absolute -top-10 right-0 text-white text-3xl hover:text-green-400" onclick="closeVideoModal()">&times;</button>
+      <div id="nowPlayingTitle" class="absolute top-3 left-4 text-green-400 font-bold text-lg animate-pulse hidden"></div>
+
+      <div id="videoContainer" class="w-full aspect-[16/9] rounded-lg overflow-hidden">
+        <!-- iframe or video injected dynamically -->
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Video Modal (same as in videos.html) -->
-<div id="videoModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center">
-  <div class="relative w-full max-w-3xl mx-4">
-    <button
-      class="absolute -top-10 right-0 text-white text-3xl hover:text-green-400"
-      onclick="closeVideoModal()"
-    >
-      &times;
-    </button>
-    <div class="aspect-w-16 aspect-h-9">
-      <iframe
-        id="videoFrame"
-        class="w-full h-96 rounded-lg"
-        frameborder="0"
-        allowfullscreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      ></iframe>
-    </div>
-  </div>
-</div>
 
 <!-- CONTACT & NEWSLETTER -->
 <section id="contact" class="py-20 bg-gradient-to-b from-slate-900 to-slate-800">
@@ -306,6 +308,32 @@
   75% { transform: translate(15px, 20px) scale(1); opacity: 0.8; }
   100% { transform: translate(0, 0) scale(1); opacity: 0.9; }
 }
+
+.grid > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Description clamp simulation */
+.description {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  transition: all 0.3s ease-in-out;
+  text-align: justify;
+}
+
+/* ✅ Collapsed/expanded logic */
+.description.collapsed {
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+}
+
+.description.expanded {
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
+}
 </style>
 
 <script>
@@ -322,6 +350,47 @@ function openVideoModal(url) {
 function closeVideoModal() {
   document.getElementById('videoFrame').src = '';
   document.getElementById('videoModal').classList.add('hidden');
+}
+
+function openVideoModal(url, title) {
+  const container = document.getElementById("videoContainer");
+  const modal = document.getElementById("videoModal");
+  const nowPlaying = document.getElementById("nowPlayingTitle");
+
+  let embedHTML = "";
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    const videoId = url.replace("https://www.youtube.com/watch?v=", "").replace("https://youtu.be/", "").split("&")[0];
+    embedHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                   class="w-full h-full" frameborder="0"
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                   allowfullscreen></iframe>`;
+  } else if (url.includes("vimeo.com")) {
+    const videoId = url.split("/").pop();
+    embedHTML = `<iframe src="https://player.vimeo.com/video/${videoId}?autoplay=1"
+                   class="w-full h-full" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+  } else {
+    embedHTML = `<video src="${url}" class="w-full h-full" controls autoplay></video>`;
+  }
+
+  container.innerHTML = embedHTML;
+  nowPlaying.textContent = title;
+  nowPlaying.classList.remove("hidden");
+  modal.classList.remove("hidden");
+}
+
+function closeVideoModal() {
+  const container = document.getElementById("videoContainer");
+  const modal = document.getElementById("videoModal");
+  document.getElementById("nowPlayingTitle").classList.add("hidden");
+  container.innerHTML = "";
+  modal.classList.add("hidden");
+}
+
+function toggleDescription(button) {
+  const description = button.previousElementSibling;
+  const expanded = description.classList.toggle("expanded");
+  description.classList.toggle("collapsed", !expanded);
+  button.textContent = expanded ? "Show less" : "Show more";
 }
 </script>
 
