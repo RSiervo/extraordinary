@@ -1,5 +1,4 @@
 import os
-from io import BytesIO
 from django.core.files.storage import Storage
 from django.core.files.base import ContentFile
 from supabase import create_client, Client
@@ -18,22 +17,19 @@ supabase: Client = create_client(
 
 class SupabaseStorage(Storage):
     def _save(self, name, content):
-        """Uploads a file to Supabase Storage safely."""
+        """Uploads a file to Supabase Storage."""
+        content.seek(0)
+        data = content.read()
+
         try:
-            # Ensure pointer is at start
-            content.seek(0)
-            data = BytesIO(content.read())
+            # ✅ Upload raw bytes (no BytesIO, no file_options)
+            response = supabase.storage.from_(SUPABASE_BUCKET).upload(name, data)
 
-            # Upload file
-            response = supabase.storage.from_(SUPABASE_BUCKET).upload(
-                path=name,
-                file=data,
-                file_options={"content-type": "application/octet-stream", "upsert": True}
-            )
-
-            # Explicit error handling
-            if hasattr(response, "error") and response.error:
-                raise Exception(f"Supabase upload error: {response.error}")
+            # Check for any Supabase error in response
+            if isinstance(response, dict) and response.get("error"):
+                raise Exception(response["error"])
+            elif "error" in str(response).lower():
+                raise Exception(str(response))
 
         except Exception as e:
             raise Exception(f"Failed to upload '{name}' to Supabase: {e}")
@@ -41,10 +37,10 @@ class SupabaseStorage(Storage):
         return name
 
     def exists(self, name):
-        """Checks if the file exists in the bucket."""
+        """Checks if the file already exists in Supabase bucket."""
         try:
             files = supabase.storage.from_(SUPABASE_BUCKET).list()
-            return any(file.get("name") == name for file in files)
+            return any(file["name"] == name for file in files)
         except Exception:
             return False
 
@@ -53,7 +49,7 @@ class SupabaseStorage(Storage):
         return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{name}"
 
     def open(self, name, mode="rb"):
-        """Downloads file content."""
+        """Downloads a file from Supabase Storage."""
         try:
             response = supabase.storage.from_(SUPABASE_BUCKET).download(name)
             if hasattr(response, "read"):
